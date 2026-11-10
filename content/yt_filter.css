@@ -1,0 +1,226 @@
+/* Distraction Free - YouTube Filter Styles */
+
+/* When card is blocked: hide original video contents, display the blocked placeholder */
+.df-yt-card-blocked > *:not(.df-blocked-placeholder) {
+  display: none !important;
+}
+
+.df-yt-card-blocked {
+  display: block !important;
+  min-height: 52px !important;
+  margin-bottom: 8px !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fallback full-hide when user clicks "Hide Blocked completely" */
+.df-yt-hidden-completely {
+  display: none !important;
+}
+
+/* Blocked Placeholder Widget */
+.df-blocked-placeholder {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: rgba(18, 18, 24, 0.94) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.16) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  box-sizing: border-box !important;
+  gap: 12px !important;
+  color: #e5e7eb !important;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+.df-blocked-placeholder:hover {
+  background: rgba(26, 26, 36, 0.98) !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+.df-placeholder-content {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  gap: 3px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.df-placeholder-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+.df-reason-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  padding: 2px 7px !important;
+  border-radius: 9999px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+}
+
+.df-reason-pill.low-sim {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+.df-placeholder-note {
+  font-size: 11px !important;
+  color: #6b7280 !important;
+  font-style: italic !important;
+}
+
+/* Unblock button — hidden by default; shown when toggle is On */
+.df-btn-unblock {
+  display: none !important;
+}
+
+body.df-yt-unblock-visible .df-btn-unblock,
+.df-yt-unblock-visible .df-btn-unblock {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #f3f4f6 !important;
+  border-radius: 6px !important;
+  padding: 5px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+body.df-yt-unblock-visible .df-btn-unblock:hover,
+.df-yt-unblock-visible .df-btn-unblock:hover {
+  background: #4f46e5 !important;
+  border-color: #6366f1 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+}
+
+body.df-yt-unblock-visible .df-btn-unblock:active,
+.df-yt-unblock-visible .df-btn-unblock:active {
+  transform: translateY(0) !important;
+}
+
+/* User-unblocked badge attached to revealed cards */
+.df-unblocked-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(16, 185, 129, 0.14) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  margin-left: 6px !important;
+  vertical-align: middle !important;
+}
+
+.df-btn-reblock {
+  background: none !important;
+  border: none !important;
+  color: #9ca3af !important;
+  cursor: pointer !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+  margin-left: 2px !important;
+  transition: color 0.15s ease !important;
+}
+
+.df-btn-reblock:hover {
+  color: #f87171 !important;
+}
+
+/* ==========================================================================
+   BLOCK YOUTUBE CHIP BAR / TOPIC SCROLL ("The yt scroll down")
+   ========================================================================== */
+yt-related-chip-cloud-renderer,
+ytd-feed-filter-chip-bar-renderer,
+#related #chips,
+#secondary #chips,
+#secondary-inner #chips,
+iron-selector#chips,
+yt-chip-cloud-renderer,
+#header.ytd-watch-next-secondary-results-renderer:has(yt-related-chip-cloud-renderer, #chips, yt-chip-cloud-renderer) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ==========================================================================
+   BLOCK YOUTUBE ADS & SPONSORED RECOMMENDATIONS ("and the ad below")
+   ========================================================================== */
+ytd-compact-video-renderer:has(.badge-style-type-ad),
+ytd-compact-video-renderer:has(ytd-ad-slot-renderer),
+ytd-compact-video-renderer:has(yt-ad-slot-view-model),
+ytd-compact-video-renderer:has([aria-label*="Sponsored" i]),
+ytd-compact-video-renderer:has([aria-label*="Learn more" i]),
+yt-lockup-view-model:has(.badge-style-type-ad),
+yt-lockup-view-model:has(ytd-ad-slot-renderer),
+yt-lockup-view-model:has(yt-ad-slot-view-model),
+yt-lockup-view-model:has([aria-label*="Sponsored" i]),
+yt-lockup-view-model:has([aria-label*="Learn more" i]),
+ytd-rich-item-renderer:has(.badge-style-type-ad),
+ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+ytd-rich-item-renderer:has(yt-ad-slot-view-model),
+ytd-rich-item-renderer:has([aria-label*="Sponsored" i]),
+ytd-rich-item-renderer:has([aria-label*="Learn more" i]),
+ytd-ad-slot-renderer,
+yt-ad-slot-view-model,
+ytd-in-feed-ad-layout-renderer,
+ytd-promoted-sparkles-web-renderer,
+ytd-promoted-video-renderer,
+ytd-display-ad-renderer,
+ytd-statement-banner-renderer,
+ytd-banner-promo-renderer,
+ytd-companion-slot-renderer,
+#player-ads,
+.badge-style-type-ad {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+
+.df-yt-score-badge {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}

@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "Distraction Free - Focus Shield",
+  "version": "1.0.0",
+  "description": "Permanently blocks X feed, trends & sidebar with magnetic evasion, and filters low-similarity YouTube recommendations.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Distraction Free Settings",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.x.com/*",
+    "*://*.twitter.com/*",
+    "*://*.youtube.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.x.com/*",
+        "*://*.twitter.com/*"
+      ],
+      "css": [
+        "content/x_blocker.css"
+      ],
+      "js": [
+        "content/x_blocker.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "css": [
+        "content/yt_filter.css"
+      ],
+      "js": [
+        "content/text_similarity.js",
+        "content/yt_filter.js"
+      ],
+      "run_at": "document_end"
+    }
+  ]
+}

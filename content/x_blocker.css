@@ -1,0 +1,420 @@
+/* Distraction Free - X (Twitter) Blocker Styles */
+
+/* ==========================================================================
+   1. PRIMARY FEED BLOCKING (Scoped strictly to Home, Explore, Notifications)
+   ========================================================================== */
+
+/* Hide Home timeline posts, streams, and tabs */
+body.df-x-feed-blocked.df-on-home [data-testid="primaryColumn"] [aria-label*="Timeline: Your Home Timeline"],
+body.df-x-feed-blocked.df-on-home div[data-testid="ScrollSnap-List"],
+body.df-x-feed-blocked.df-on-home [data-testid="primaryColumn"] nav[role="navigation"],
+body.df-x-feed-blocked.df-on-home [data-testid="primaryColumn"] section[role="region"]:not([aria-label*="Conversation" i]):not([aria-label*="User" i]) div[data-testid="cellInnerDiv"],
+
+/* Hide Explore timeline, search results, and trending feeds */
+body.df-x-feed-blocked.df-on-explore [data-testid="primaryColumn"] [aria-label*="Timeline: Explore"],
+body.df-x-feed-blocked.df-on-explore [data-testid="primaryColumn"] [data-testid="trend"],
+body.df-x-feed-blocked.df-on-explore [data-testid="primaryColumn"] div[aria-label*="Timeline: Search"],
+body.df-x-feed-blocked.df-on-explore [data-testid="primaryColumn"] section[role="region"]:not([aria-label*="Conversation" i]):not([aria-label*="User" i]) div[data-testid="cellInnerDiv"],
+
+/* Hide Notifications timeline */
+body.df-x-feed-blocked.df-on-notifications [data-testid="primaryColumn"] [aria-label*="Timeline: Notifications"],
+body.df-x-feed-blocked.df-on-notifications [data-testid="primaryColumn"] section[role="region"]:not([aria-label*="Conversation" i]):not([aria-label*="User" i]) div[data-testid="cellInnerDiv"] {
+  display: none !important;
+}
+
+body.df-x-feed-blocked.df-on-home [data-testid="primaryColumn"] section[role="region"]:not([aria-label*="Conversation" i]):not([aria-label*="User" i]),
+body.df-x-feed-blocked.df-on-explore [data-testid="primaryColumn"] section[role="region"]:not([aria-label*="Conversation" i]):not([aria-label*="User" i]),
+body.df-x-feed-blocked.df-on-notifications [data-testid="primaryColumn"] section[role="region"]:not([aria-label*="Conversation" i]):not([aria-label*="User" i]) {
+  min-height: 0 !important;
+}
+
+/* ==========================================================================
+   EXPLICIT WHITELIST: SPECIFIC TWEETS, PROFILES, DMs, ETC. ALWAYS WORK
+   ========================================================================== */
+[aria-label*="Conversation" i],
+[aria-label*="Conversation" i] div[data-testid="cellInnerDiv"],
+[aria-label*="User's Tweets" i],
+[aria-label*="User's Tweets" i] div[data-testid="cellInnerDiv"],
+[data-testid="tweet"],
+[data-testid="tweetText"],
+[data-testid="tweetButtonInline"],
+[data-testid="UserProfileHeader_Items"],
+[data-testid="UserDescription"],
+[data-testid="UserName"],
+[data-testid="UserAvatar"],
+[data-testid="DMDrawer"],
+[data-testid="DmMessagingBox"] {
+  display: revert !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ==========================================================================
+   2. BLUE "POSTED" CAPSULE BLOCKING
+   ========================================================================== */
+
+/*
+ * The blue "X posted" pill is a fixed/sticky div[role="button"] with a blue
+ * background. X uses inline styles (rgb(29,155,240) / #1d9bf0) OR CSS classes
+ * with no stable testid. We catch every variant:
+ *
+ * — testid attributes
+ * — inline background-color in any spacing variant
+ * — any div[role="button"] that is position:fixed or position:sticky near the
+ *   top of the viewport (the pill always sits at the top of the feed column)
+ * — the df-x-blocked-posted-pill JS-tagged class
+ */
+body.df-x-feed-blocked [data-testid="pill-top"],
+body.df-x-feed-blocked [data-testid*="pillLabel"],
+body.df-x-feed-blocked [data-testid*="pill" i]:not([data-testid*="sidebar" i]),
+
+/* Inline style variants for floating button */
+body.df-x-feed-blocked div[role="button"][style*="background-color: rgb(29, 155, 240)"]:not([data-testid*="Tweet" i]):not([data-testid*="follow" i]),
+body.df-x-feed-blocked div[role="button"][style*="background-color:rgb(29, 155, 240)"]:not([data-testid*="Tweet" i]):not([data-testid*="follow" i]),
+body.df-x-feed-blocked div[role="button"][style*="background-color: rgb(29,155,240)"]:not([data-testid*="Tweet" i]):not([data-testid*="follow" i]),
+body.df-x-feed-blocked div[role="button"][style*="background-color:#1d9bf0"]:not([data-testid*="Tweet" i]):not([data-testid*="follow" i]),
+body.df-x-feed-blocked div[role="button"][style*="background-color: #1d9bf0"]:not([data-testid*="Tweet" i]):not([data-testid*="follow" i]),
+
+/* JS-tagged class */
+body.df-x-feed-blocked .df-x-blocked-posted-pill {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* ==========================================================================
+   2b. NOTIFICATION SIDEBAR NUMBER CAPSULE — NEVER SHOW NOTIFICATION ARRIVAL
+   ========================================================================== */
+
+/* Notification count number capsule / badge on the Notifications sidebar link */
+a[href*="/notifications"] [data-testid="notificationBadge"],
+a[href*="/notifications"] [data-testid="badge"],
+a[href*="/notifications"] [data-testid="count"],
+a[href*="/notifications"] span[data-testid="badge"],
+a[href*="/notifications"] [aria-label*="unread" i],
+a[data-testid*="Notifications"] [data-testid="notificationBadge"],
+a[data-testid*="Notifications"] [data-testid="badge"],
+a[data-testid*="Notifications"] [data-testid="count"],
+a[data-testid*="Notifications"] [aria-label*="unread" i],
+a[aria-label*="Notification" i] [data-testid="badge"],
+a[aria-label*="Notification" i] [data-testid="notificationBadge"],
+a[aria-label*="Notification" i] [aria-label*="unread" i],
+.df-x-blocked-notification-badge,
+/* In-app toasts, alerts, and sheet dialog notification prompts */
+[data-testid="toast"],
+div[role="alert"][aria-live] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   4. FOCUS HERO CARD (CENTRAL BLOCKER IN PRIMARY COLUMN)
+   ========================================================================== */
+
+#df-x-blocker-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 16px;
+  padding: 44px 24px 50px 24px;
+  background: linear-gradient(145deg, rgba(22, 22, 28, 0.96), rgba(12, 12, 16, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  color: #f3f4f6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  animation: dfFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 340px;
+}
+
+#df-x-blocker-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #6366f1);
+}
+
+@keyframes dfFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.df-x-icon-shield {
+  width: 54px;
+  height: 54px;
+  margin-bottom: 16px;
+  color: #ef4444;
+  filter: drop-shadow(0 4px 12px rgba(239, 68, 68, 0.35));
+}
+
+.df-x-headline {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px 0;
+  line-height: 1.25;
+}
+
+.df-x-headline.work-mode {
+  color: #f87171;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 10px rgba(239, 68, 68, 0.2);
+}
+
+/* Quote Card Styling */
+.df-x-quote-box {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid #6366f1;
+  border-radius: 12px;
+  padding: 16px 22px;
+  margin: 14px 0 18px 0;
+  max-width: 480px;
+  text-align: left;
+}
+
+.df-x-quote-text {
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.55;
+  color: #f3f4f6;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.df-x-quote-mark {
+  font-size: 24px;
+  font-family: Georgia, serif;
+  color: #818cf8;
+  line-height: 0;
+  vertical-align: -4px;
+  margin-right: 4px;
+}
+
+.df-x-quote-mark.end {
+  margin-left: 4px;
+  margin-right: 0;
+}
+
+.df-x-subtext {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0 0 16px 0;
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+.df-x-shortcut-hint {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ==========================================================================
+   5. MAGNETIC NORTH POLE FORCEFIELD & CURSOR REPULSION
+   ========================================================================== */
+
+.df-x-magnetic-arena {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  user-select: none;
+  overflow: visible;
+}
+
+.df-x-magnetic-arena.repelling {
+  cursor: none !important;
+}
+
+.df-x-magnetic-arena.repelling * {
+  cursor: none !important;
+}
+
+/* Magnetic forcefield rings around the static button */
+.df-x-field-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.df-x-field-ring.outer {
+  width: 260px;
+  height: 260px;
+  border: 1px dashed rgba(99, 102, 241, 0.25);
+  animation: dfSpinField 20s linear infinite;
+}
+
+.df-x-field-ring.inner {
+  width: 180px;
+  height: 180px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+}
+
+.df-x-magnetic-arena.active-repel .df-x-field-ring.inner {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.35);
+  animation: dfJitterRing 0.1s infinite alternate;
+}
+
+.df-x-magnetic-arena.breached .df-x-field-ring.inner {
+  border-color: rgba(52, 211, 153, 0.8);
+  box-shadow: 0 0 30px rgba(52, 211, 153, 0.4);
+}
+
+@keyframes dfSpinField {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes dfJitterRing {
+  from { transform: translate(-50%, -50%) scale(0.98); }
+  to { transform: translate(-50%, -50%) scale(1.02); }
+}
+
+/* North Pole Pole Indicator */
+.df-x-pole-indicator {
+  position: absolute;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #f87171;
+}
+
+.df-x-pole-badge {
+  background: #ef4444;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Pressure Resistance Bar */
+.df-x-resistance-bar-wrap {
+  position: absolute;
+  bottom: 12px;
+  width: 220px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.df-x-resistance-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+  border-radius: 9999px;
+  transition: width 0.05s linear;
+}
+
+.df-x-resistance-label {
+  position: absolute;
+  bottom: 24px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.02em;
+}
+
+/* The Central Button: REMAINS CONSTANT (Fixed in place) */
+.df-x-btn-flip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  color: #f3f4f6;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+  transition: all 0.2s ease;
+  user-select: none;
+  z-index: 10;
+  /* Remains constant */
+  transform: none !important;
+}
+
+.df-x-btn-flip.breached {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-color: #34d399;
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5);
+  cursor: pointer !important;
+}
+
+/* Custom Virtual Repelled Cursor — positioned via transform only (compositor layer) */
+#df-x-north-cursor {
+  position: fixed;
+  /* anchor at 0,0 — actual position set via transform in JS */
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.9) 20%, rgba(99, 102, 241, 0.6) 80%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 16px #ef4444, 0 0 6px #6366f1;
+  pointer-events: none;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  /* No transition — position is set every rAF, transition would lag */
+  will-change: transform;
+  contain: strict;
+}
+
+#df-x-north-cursor.breached {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.9) 20%, rgba(52, 211, 153, 0.6) 80%);
+  box-shadow: 0 0 16px #10b981;
+}
+
+#df-x-north-cursor.hidden {
+  display: none !important;
+}

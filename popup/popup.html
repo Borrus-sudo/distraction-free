@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distraction Free</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-2.33v8.02z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Distraction Free</h1>
+          <span class="subtext">Focus Shield for X & YouTube</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Quote Banner -->
+    <div class="quote-banner">
+      <div class="quote-header">
+        <span class="quote-headline">Getting to fucking work</span>
+      </div>
+      <p class="quote-body">“How little we remember the tweets we scrolled. You are much better off reading a book or touching grass”</p>
+    </div>
+
+    <!-- Section 1: X (Twitter) Control -->
+    <div class="section-card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg class="brand-icon x-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+          <h2>X (Twitter) Focus Guard</h2>
+        </div>
+      </div>
+      <p class="section-desc">Permanently blocks the feed, blue posted capsule, "What's happening", and "Who to follow".</p>
+      
+      <!-- Option: Show Unblock Button on X (Default: False) -->
+      <div class="option-row" style="margin-top: 8px;">
+        <div class="option-label">
+          <span>Show Unblock Button</span>
+          <small>Hidden by default. Features magnetic repulsion haptics.</small>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-show-unblock-x">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="shortcut-box" style="margin-top: 6px;">
+        <span>Emergency shortcut: <strong>Alt + Shift + X</strong></span>
+      </div>
+    </div>
+
+    <!-- Section 2: YouTube Recommendation Filter -->
+    <div class="section-card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg class="brand-icon yt-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+          <h2>YouTube Filter</h2>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-yt-filter" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- Option: Similarity Threshold Slider -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>Similarity Strictness</span>
+          <span class="slider-val" id="similarity-val">20%</span>
+        </div>
+        <input type="range" id="similarity-slider" min="5" max="50" step="5" value="20">
+        <div class="slider-labels">
+          <span>Permissive (5%)</span>
+          <span>Balanced (20%)</span>
+          <span>Strict (50%)</span>
+        </div>
+        <small class="slider-hint">Hides recommendations whose titles lack semantic overlap with current video.</small>
+      </div>
+
+      <!-- Option: Show Score Badges -->
+      <div class="option-row" style="margin-top: 10px;">
+        <div class="option-label">
+          <span>Show Similarity Badges</span>
+          <small>Displays match % tag on recommendations</small>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-score-badges" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- Option: Show Unblock Button on YouTube (Default: False) -->
+      <div class="option-row">
+        <div class="option-label">
+          <span>Show Unblock Buttons</span>
+          <small>Displays [Unblock] on filtered recommendation cards</small>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-show-unblock-yt">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>FocusShield v1.0 • Built for maximum deep work</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
