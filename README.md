@@ -6,7 +6,7 @@ A lightweight, zero-dependency Chrome extension (Manifest V3) designed to elimin
 
 ## 🚀 Key Features
 
-### 1. X (Twitter) Focus Guard & Magnetic North Pole Haptics
+### 1. X (Twitter) Focus Guard
 - **Targeted Blocking**:
   - Automatically blocks addictive infinite-scroll pages: **Home** (`/`, `/home`), **Explore / Search / Trends** (`/explore`, `/search`, `/i/trends`), and **Notifications** (`/notifications`).
   - Displays a clean Focus Shield blocker card with a mindful quote (*"How little we remember the tweets we scrolled and the shots we binged. You are better off sleeping or touching grass"*) on blocked pages.
@@ -18,11 +18,9 @@ A lightweight, zero-dependency Chrome extension (Manifest V3) designed to elimin
 - **Silenced Distraction Triggers**:
   - **Floating Blue "Posted" Capsule**: The floating pill prompting you to scroll back to top for new tweets is hidden.
   - **Notification Badge Silenced**: The blue unread number capsule on the Notifications bell link in the sidebar is hidden, and unread count badges in tab titles `(3)` are stripped.
-- **Magnetic North Pole Cursor Repulsion**:
-  - An optional unblock button can be enabled in the popup (disabled by default).
-  - When enabled, the button is protected by a virtual magnetic north pole forcefield: approaching within $170\text{px}$ repels your cursor outward.
-  - **Pressure Breakthrough**: Moving your cursor vigorously builds physical pressure (0% to 100%) to momentarily breach the forcefield for 3.5 seconds.
-- **Emergency Shortcut**: `Alt + Shift + X`.
+- **Manual Unblock & Emergency Override**:
+  - An optional manual unblock button can be toggled on inside the extension popup (disabled by default).
+  - Emergency shortcut: `Alt + Shift + X`.
 
 ---
 

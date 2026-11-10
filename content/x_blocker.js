@@ -12,42 +12,13 @@
 
   // --- Cached DOM refs (nulled on card rebuild) ---
   let _btn = null;
-  let _arena = null;
-  let _resBar = null;
-  let _resLabel = null;
-  let _btnLabel = null;
-  let _virtualCursor = null;
-
-  // --- Cached button rect; invalidated on resize/scroll ---
-  let _btnRect = null;
-  let _btnRectStale = true;
 
   // --- URL tracking via Navigation API or polling fallback ---
   let lastUrl = location.href;
-  let urlPollId = null;
 
   // --- Observer ---
   let mutationObserver = null;
   let mutationDebounceId = null;
-
-  // --- Magnetic physics (all reads in mousemove, all writes in rAF) ---
-  const mag = {
-    pressure: 0,
-    isBreached: false,
-    breachTimerId: null,
-    inArena: false,
-    // Raw mouse position (written in mousemove, read in rAF)
-    rawX: 0,
-    rawY: 0,
-    // Delta for inward-velocity calculation
-    prevX: 0,
-    prevY: 0,
-    isMouseDown: false,
-    rafId: null,
-    // Rendered cursor position (smoothed)
-    curX: 0,
-    curY: 0
-  };
 
   // =========================================================================
   // Settings
@@ -108,19 +79,6 @@
   }
 
   const isHome = () => getBlockedPageType() === 'home';
-
-  // Invalidate cached button rect whenever the viewport shifts
-  const invalidateRect = () => { _btnRectStale = true; };
-  window.addEventListener('resize', invalidateRect, { passive: true });
-  window.addEventListener('scroll', invalidateRect, { passive: true });
-
-  function getBtnRect() {
-    if (_btnRectStale && _btn) {
-      _btnRect = _btn.getBoundingClientRect();
-      _btnRectStale = false;
-    }
-    return _btnRect;
-  }
 
   // =========================================================================
   // Posted capsule blocking — comprehensive detection for modern X
@@ -292,26 +250,15 @@
       subtext = 'Notifications page is locked. Return to deep work.';
     }
 
-    const arenaHtml = showUnblockButton ? `
-      <div class="df-x-magnetic-arena" id="df-x-magnetic-arena">
-        <div class="df-x-field-ring outer"></div>
-        <div class="df-x-field-ring inner"></div>
-        <div class="df-x-pole-indicator">
-          <span class="df-x-pole-badge">N</span>
-          <span>North Pole Forcefield Active</span>
-        </div>
+    const unblockHtml = showUnblockButton ? `
+      <div class="df-x-unblock-wrap">
         <button class="df-x-btn-flip" id="df-x-btn-flip-action" type="button">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
           </svg>
-          <span id="df-x-btn-label">Flip Feed: Unblock</span>
+          <span>Temporarily Unblock Feed</span>
         </button>
-        <div class="df-x-resistance-label" id="df-x-resistance-label">
-          Magnetic Repulsion • Apply Pressure to Breach
-        </div>
-        <div class="df-x-resistance-bar-wrap">
-          <div class="df-x-resistance-bar" id="df-x-resistance-bar"></div>
-        </div>
       </div>
     ` : '';
 
@@ -327,229 +274,23 @@
         <span class="df-x-quote-mark end">"</span>
       </div>
       <p class="df-x-subtext">${subtext}</p>
-      ${arenaHtml}
+      ${unblockHtml}
       <div class="df-x-shortcut-hint">Emergency shortcut: Alt + Shift + X</div>
     `;
 
     primaryCol.prepend(card);
 
     if (showUnblockButton) {
-      // Cache refs immediately after insertion
-      _btn      = card.querySelector('#df-x-btn-flip-action');
-      _arena    = card.querySelector('#df-x-magnetic-arena');
-      _resBar   = card.querySelector('#df-x-resistance-bar');
-      _resLabel = card.querySelector('#df-x-resistance-label');
-      _btnLabel = card.querySelector('#df-x-btn-label');
-      _btnRectStale = true;
-      setupMagneticHaptics();
+      _btn = card.querySelector('#df-x-btn-flip-action');
+      if (_btn) {
+        _btn.addEventListener('click', () => toggleFeedFlip());
+      }
     }
   }
 
   function removeBlockerCard() {
     document.querySelectorAll('#df-x-blocker-card').forEach(card => card.remove());
-    stopMagneticHaptics();
-    _btn = _arena = _resBar = _resLabel = _btnLabel = null;
-  }
-
-  // =========================================================================
-  // Virtual cursor
-  // =========================================================================
-
-  function getVirtualCursor() {
-    if (_virtualCursor && document.body.contains(_virtualCursor)) return _virtualCursor;
-    const el = document.createElement('div');
-    el.id = 'df-x-north-cursor';
-    el.className = 'hidden';
-    el.textContent = 'N';
-    document.body.appendChild(el);
-    _virtualCursor = el;
-    return el;
-  }
-
-  function hideVirtualCursor() {
-    _virtualCursor?.classList.add('hidden');
-  }
-
-  function stopMagneticHaptics() {
-    cancelAnimationFrame(mag.rafId);
-    mag.rafId = null;
-    mag.inArena = false;
-    mag.pressure = 0;
-    mag.isBreached = false;
-    clearTimeout(mag.breachTimerId);
-    hideVirtualCursor();
-  }
-
-  // =========================================================================
-  // Magnetic North Pole Physics
-  // =========================================================================
-
-  function setupMagneticHaptics() {
-    if (!_btn || !_arena) return;
-
-    Object.assign(mag, {
-      pressure: 0, isBreached: false, inArena: false,
-      rawX: 0, rawY: 0, prevX: 0, prevY: 0, isMouseDown: false
-    });
-
-    const cursor = getVirtualCursor();
-
-    _btn.addEventListener('click', (e) => {
-      if (mag.isBreached) { e.stopPropagation(); toggleFeedFlip(); }
-    });
-
-    _arena.addEventListener('mouseenter', () => {
-      mag.inArena = true;
-      _arena.classList.add('repelling');
-      cursor.classList.remove('hidden');
-      _btnRectStale = true; // re-measure when entering
-    });
-
-    _arena.addEventListener('mouseleave', () => {
-      mag.inArena = false;
-      _arena.classList.remove('repelling');
-      cursor.classList.add('hidden');
-      mag.pressure = 0;
-      setHud(0);
-    });
-
-    // Use addEventListener (not .onmousedown) so we don't clobber other handlers
-    window.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-
-    // Start render loop
-    cancelAnimationFrame(mag.rafId);
-    mag.rafId = requestAnimationFrame(physicsRender);
-  }
-
-  function onMouseDown() { mag.isMouseDown = true; }
-  function onMouseUp()   { mag.isMouseDown = false; }
-
-  function onMouseMove(e) {
-    if (!mag.inArena) return;
-
-    mag.prevX = mag.rawX;
-    mag.prevY = mag.rawY;
-    mag.rawX  = e.clientX;
-    mag.rawY  = e.clientY;
-
-    // Inward-velocity pressure build — no getBoundingClientRect here
-    const rect = getBtnRect();
-    if (!rect) return;
-    const bcx = rect.left + rect.width  / 2;
-    const bcy = rect.top  + rect.height / 2;
-
-    const dx = mag.rawX - bcx;
-    const dy = mag.rawY - bcy;
-    const dist = Math.hypot(dx, dy);
-
-    if (dist > 0 && dist < 220) {
-      const ux = dx / dist;
-      const uy = dy / dist;
-      // Inward movement = cursor moved toward centre
-      const inward = -((mag.rawX - mag.prevX) * ux + (mag.rawY - mag.prevY) * uy);
-      if (inward > 0) {
-        mag.pressure = Math.min(100, mag.pressure + inward * 1.6);
-      }
-    }
-
-    if (mag.isMouseDown) {
-      mag.pressure = Math.min(100, mag.pressure + 2.0);
-    }
-  }
-
-  // All DOM writes happen only inside the rAF callback
-  function physicsRender() {
-    if (!isFeedBlocked || !showUnblockButton) {
-      hideVirtualCursor();
-      return; // stop loop
-    }
-
-    const cursor = _virtualCursor;
-
-    if (mag.inArena && _btn && _arena) {
-      const rect  = getBtnRect();
-      if (rect) {
-        const bcx  = rect.left + rect.width  / 2;
-        const bcy  = rect.top  + rect.height / 2;
-        const dx   = mag.rawX - bcx;
-        const dy   = mag.rawY - bcy;
-        const dist = Math.hypot(dx, dy);
-        const R    = 170;
-
-        // Breach check
-        if (mag.pressure >= 100 && !mag.isBreached) {
-          mag.isBreached = true;
-          _arena.classList.add('breached');
-          _btn.classList.add('breached');
-          cursor?.classList.add('breached');
-          if (_btnLabel) _btnLabel.textContent = '⚡ Breached! Click to Unblock';
-
-          clearTimeout(mag.breachTimerId);
-          mag.breachTimerId = setTimeout(() => {
-            mag.isBreached = false;
-            mag.pressure   = 0;
-            _arena?.classList.remove('breached');
-            _btn?.classList.remove('breached');
-            cursor?.classList.remove('breached');
-            if (_btnLabel) _btnLabel.textContent = 'Flip Feed: Unblock';
-            setHud(0);
-          }, 3500);
-        }
-
-        // Pressure decay (not while breached)
-        if (!mag.isBreached) {
-          mag.pressure = Math.max(0, mag.pressure - 0.6);
-        }
-
-        setHud(mag.pressure);
-
-        // Repulsion: cursor is pushed outward; button stays put
-        let curX = mag.rawX;
-        let curY = mag.rawY;
-
-        if (!mag.isBreached && dist < R && dist > 0) {
-          _arena.classList.add('active-repel');
-          const ux = dx / dist;
-          const uy = dy / dist;
-          const strength = Math.pow((R - dist) / R, 1.3) * 160 * (1 - mag.pressure / 100);
-          curX += ux * strength;
-          curY += uy * strength;
-        } else {
-          _arena.classList.remove('active-repel');
-        }
-
-        // Write cursor position with transform (compositor layer, no layout)
-        if (cursor) {
-          cursor.style.transform = `translate(calc(${curX}px - 50%), calc(${curY}px - 50%))`;
-        }
-      }
-    }
-
-    mag.rafId = requestAnimationFrame(physicsRender);
-  }
-
-  // Throttled HUD update — only repaint when value changes meaningfully
-  let _lastHudPct = -1;
-  function setHud(pct) {
-    const rounded = Math.round(pct);
-    if (rounded === _lastHudPct) return;
-    _lastHudPct = rounded;
-
-    if (_resBar)   _resBar.style.width = `${pct}%`;
-    if (_resLabel) {
-      if (mag.isBreached) {
-        _resLabel.textContent = '⚡ FIELD BREACHED — CLICK NOW!';
-        _resLabel.style.color = '#34d399';
-      } else if (pct > 0) {
-        _resLabel.textContent = `Pressure: ${rounded}% — PUSH HARDER!`;
-        _resLabel.style.color = '#fbbf24';
-      } else {
-        _resLabel.textContent = 'Magnetic Repulsion • Apply Pressure to Breach';
-        _resLabel.style.color = '#9ca3af';
-      }
-    }
+    _btn = null;
   }
 
   // =========================================================================
@@ -558,10 +299,6 @@
 
   function toggleFeedFlip() {
     isFeedBlocked = !isFeedBlocked;
-    // Remove stale listeners before rebuilding
-    window.removeEventListener('mousedown', onMouseDown);
-    window.removeEventListener('mouseup',   onMouseUp);
-    window.removeEventListener('mousemove', onMouseMove);
     applyBlockState();
   }
 
@@ -610,7 +347,7 @@
   }
 
   // Nodes that should NOT trigger a re-scan
-  const IGNORE_IDS = new Set(['df-x-blocker-card', 'df-x-north-cursor']);
+  const IGNORE_IDS = new Set(['df-x-blocker-card']);
   const IGNORE_CLASSES = ['df-x-blocked-posted-pill', 'df-x-blocked-notification-badge'];
 
   function initObserver() {
@@ -646,11 +383,6 @@
   function onUrlChange() {
     if (location.href === lastUrl) return;
     lastUrl = location.href;
-    // Remove old magnetic listeners before rebuilding
-    window.removeEventListener('mousedown', onMouseDown);
-    window.removeEventListener('mouseup',   onMouseUp);
-    window.removeEventListener('mousemove', onMouseMove);
-    stopMagneticHaptics();
     applyBlockState();
   }
 
