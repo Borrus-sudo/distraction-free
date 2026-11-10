@@ -418,3 +418,27 @@ div[role="alert"][aria-live] {
 #df-x-north-cursor.hidden {
   display: none !important;
 }
+
+/* ==========================================================================
+   POST COMPOSER MODAL BLUR & FEED SHIELD
+   When composing a post, blur the background feed completely and darken mask
+   ========================================================================== */
+body.df-compose-open #react-root,
+body:has(#layers [data-testid="tweetTextarea_0"]) #react-root,
+body:has(#layers [role="dialog"]) #react-root,
+body:has(#layers [data-testid="mask"]) #react-root {
+  filter: blur(16px) !important;
+  -webkit-filter: blur(16px) !important;
+  transition: filter 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+#layers [data-testid="mask"],
+#layers div[style*="background-color: rgba(0, 0, 0"],
+#layers div[style*="background-color:rgba(0, 0, 0"] {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
+

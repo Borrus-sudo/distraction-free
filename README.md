@@ -9,10 +9,12 @@ A lightweight, zero-dependency Chrome extension (Manifest V3) designed to elimin
 ### 1. X (Twitter) Focus Guard & Magnetic North Pole Haptics
 - **Targeted Blocking**:
   - Automatically blocks addictive infinite-scroll pages: **Home** (`/`, `/home`), **Explore / Search / Trends** (`/explore`, `/search`, `/i/trends`), and **Notifications** (`/notifications`).
-  - Displays a clean Focus Shield blocker card with a mindful quote on blocked pages.
+  - Displays a clean Focus Shield blocker card with a mindful quote (*"How little we remember the tweets we scrolled and the shots we binged. You are better off sleeping or touching grass"*) on blocked pages.
 - **Specific Tweets & Profiles Always Work**:
   - Direct tweet links and conversation threads (`/username/status/...`) remain 100% usable.
   - User profile pages (`/username`), Direct Messages (`/messages`), Bookmarks (`/i/bookmarks`), and Lists are never blocked.
+- **Post Composer Background Blur**:
+  - When pressing "Post" or navigating to `/compose/post`, the underlying background feed remains strictly blocked and heavily blurred (`blur(16px)` + backdrop mask) so focus is never broken while writing.
 - **Silenced Distraction Triggers**:
   - **Floating Blue "Posted" Capsule**: The floating pill prompting you to scroll back to top for new tweets is hidden.
   - **Notification Badge Silenced**: The blue unread number capsule on the Notifications bell link in the sidebar is hidden, and unread count badges in tab titles `(3)` are stripped.

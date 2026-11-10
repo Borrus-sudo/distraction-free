@@ -74,11 +74,30 @@
   }
 
   // =========================================================================
-  // Helpers — identify Home, Explore, and Notifications
+  // Helpers — identify Home, Explore, and Notifications + Compose State
   // =========================================================================
 
+  // Tracks the underlying page before the compose modal opened
+  let lastNonComposePath = '/home';
+
+  function updateComposeState() {
+    const isComposePath = location.pathname.toLowerCase().startsWith('/compose/');
+    const hasComposeModal = !!document.querySelector(
+      '#layers [data-testid="tweetTextarea_0"], #layers [role="dialog"], #layers [data-testid="mask"]'
+    );
+    const isComposeOpen = isComposePath || hasComposeModal;
+    document.body.classList.toggle('df-compose-open', isComposeOpen);
+  }
+
   function getBlockedPageType() {
-    const path = location.pathname.toLowerCase();
+    let path = location.pathname.toLowerCase();
+    // If user opened compose modal (/compose/post or /compose/tweet), preserve underlying page state
+    if (path.startsWith('/compose/')) {
+      path = lastNonComposePath;
+    } else {
+      lastNonComposePath = path;
+    }
+
     // 1. Home
     if (path === '/' || path === '/home') return 'home';
     // 2. Explore / Search / Trends
@@ -227,6 +246,7 @@
   // =========================================================================
 
   function applyBlockState() {
+    updateComposeState();
     const pageType = getBlockedPageType();
     const onBlockedPage = !!pageType;
 
@@ -296,13 +316,14 @@
     ` : '';
 
     card.innerHTML = `
-      <svg class="df-x-icon-shield" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm-1 6h2v5h-2V8zm0 7h2v2h-2v-2z"/>
+      <svg class="df-x-icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="2"/>
+        <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2.5"/>
       </svg>
       <h1 class="df-x-headline work-mode">${headline}</h1>
       <div class="df-x-quote-box">
         <span class="df-x-quote-mark">"</span>
-        <p class="df-x-quote-text">How little we remember the tweets we scrolled. You are much better off reading a book or touching grass.</p>
+        <p class="df-x-quote-text">How little we remember the tweets we scrolled and the shots we binged. You are better off sleeping or touching grass</p>
         <span class="df-x-quote-mark end">"</span>
       </div>
       <p class="df-x-subtext">${subtext}</p>
@@ -556,6 +577,9 @@
     if (mutationDebounceId) return;         // coalesce within one frame
     mutationDebounceId = requestAnimationFrame(() => {
       mutationDebounceId = null;
+
+      // Always update compose state in case modal opened without URL change or vice versa
+      updateComposeState();
 
       // Instantly catch SPA URL transitions during DOM render
       if (location.href !== lastUrl) {
