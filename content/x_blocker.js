@@ -8,6 +8,7 @@
   'use strict';
 
   let isFeedBlocked = true;
+  let xBlockerEnabled = true;
   let showUnblockButton = false;
 
   // --- Cached DOM refs (nulled on card rebuild) ---
@@ -26,7 +27,11 @@
 
   function loadSettings(cb) {
     if (typeof chrome !== 'undefined' && chrome.storage?.sync) {
-      chrome.storage.sync.get({ showXUnblockButton: false }, (items) => {
+      chrome.storage.sync.get({
+        xBlockerEnabled: true,
+        showXUnblockButton: false
+      }, (items) => {
+        xBlockerEnabled = items.xBlockerEnabled !== false;
         showUnblockButton = !!items.showXUnblockButton;
         cb && cb();
       });
@@ -37,38 +42,36 @@
 
   if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
-      if ((area === 'sync' || area === 'local') && 'showXUnblockButton' in changes) {
-        showUnblockButton = !!changes.showXUnblockButton.newValue;
-        applyBlockState();
+      if (area === 'sync' || area === 'local') {
+        let dirty = false;
+        if ('xBlockerEnabled' in changes) {
+          xBlockerEnabled = changes.xBlockerEnabled.newValue !== false;
+          dirty = true;
+        }
+        if ('showXUnblockButton' in changes) {
+          showUnblockButton = !!changes.showXUnblockButton.newValue;
+          dirty = true;
+        }
+        if (dirty) {
+          const card = document.getElementById('df-x-blocker-card');
+          if (card) {
+            syncUnblockButtonInCard(card);
+          }
+          applyBlockState();
+        }
       }
     });
   }
 
   // =========================================================================
-  // Helpers — identify Home, Explore, and Notifications + Compose State
+  // Helpers — identify Home, Explore, Notifications & Compose
   // =========================================================================
 
-  // Tracks the underlying page before the compose modal opened
-  let lastNonComposePath = '/home';
-
-  function updateComposeState() {
-    const isComposePath = location.pathname.toLowerCase().startsWith('/compose/');
-    const hasComposeModal = !!document.querySelector(
-      '#layers [data-testid="tweetTextarea_0"], #layers [role="dialog"], #layers [data-testid="mask"]'
-    );
-    const isComposeOpen = isComposePath || hasComposeModal;
-    document.body.classList.toggle('df-compose-open', isComposeOpen);
-  }
-
   function getBlockedPageType() {
-    let path = location.pathname.toLowerCase();
-    // If user opened compose modal (/compose/post or /compose/tweet), preserve underlying page state
-    if (path.startsWith('/compose/')) {
-      path = lastNonComposePath;
-    } else {
-      lastNonComposePath = path;
-    }
-
+    const path = location.pathname.toLowerCase();
+    // 0. Compose on X: everything remains blocked like the normal pages,
+    // while the post box remains accessible
+    if (path.startsWith('/compose/')) return 'home';
     // 1. Home
     if (path === '/' || path === '/home') return 'home';
     // 2. Explore / Search / Trends
@@ -204,40 +207,93 @@
   // =========================================================================
 
   function applyBlockState() {
-    updateComposeState();
     const pageType = getBlockedPageType();
-    const onBlockedPage = !!pageType;
+    const shouldBlock = xBlockerEnabled && isFeedBlocked && !!pageType;
 
-    document.body.classList.toggle('df-on-blocked-page', onBlockedPage);
+    document.body.classList.toggle('df-on-blocked-page', !!pageType);
     document.body.classList.toggle('df-on-home', pageType === 'home');
     document.body.classList.toggle('df-on-explore', pageType === 'explore');
     document.body.classList.toggle('df-on-notifications', pageType === 'notifications');
-    document.body.classList.toggle('df-x-feed-blocked', isFeedBlocked);
+    document.body.classList.toggle('df-x-feed-blocked', shouldBlock);
 
-    if (isFeedBlocked && onBlockedPage) {
+    if (shouldBlock) {
       injectBlockerCard(pageType);
       processPostedCapsule();
+      removeTemporaryUnblockBanner();
     } else {
       removeBlockerCard();
       // On unblocked pages (profile, tweets, dms, etc.), ensure content is unblocked
       document.querySelectorAll('.df-x-blocked-posted-pill').forEach(el => el.classList.remove('df-x-blocked-posted-pill'));
+
+      // If user temporarily flipped the unblock toggle on a blocked page, show re-lock banner
+      if (xBlockerEnabled && !isFeedBlocked && !!pageType) {
+        showTemporaryUnblockBanner();
+      } else {
+        removeTemporaryUnblockBanner();
+      }
     }
 
-    // Notifications sidebar number capsule is ALWAYS kept hidden
-    processNotifications();
+    // Notifications sidebar number capsule is ALWAYS kept hidden if xBlockerEnabled
+    if (xBlockerEnabled) {
+      processNotifications();
+    }
   }
 
   // =========================================================================
-  // Blocker card
+  // Blocker card & Dynamic Unblock Button Sync
   // =========================================================================
+
+  function syncUnblockButtonInCard(card) {
+    if (!card) return;
+    let wrap = card.querySelector('.df-x-unblock-wrap');
+    if (showUnblockButton) {
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.className = 'df-x-unblock-wrap';
+        wrap.innerHTML = `
+          <button class="df-x-btn-flip" id="df-x-btn-flip-action" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            </svg>
+            <span>Temporarily Unblock Feed</span>
+          </button>
+        `;
+        const hint = card.querySelector('.df-x-shortcut-hint');
+        if (hint) {
+          card.insertBefore(wrap, hint);
+        } else {
+          card.appendChild(wrap);
+        }
+      }
+      _btn = wrap.querySelector('#df-x-btn-flip-action');
+      if (_btn && !_btn.dataset.dfBound) {
+        _btn.dataset.dfBound = 'true';
+        _btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleFeedFlip();
+        });
+      }
+    } else {
+      if (wrap) {
+        wrap.remove();
+        _btn = null;
+      }
+    }
+  }
 
   function injectBlockerCard(pageType = 'home') {
     const primaryCol = document.querySelector('[data-testid="primaryColumn"]');
     if (!primaryCol) return;
 
-    if (document.getElementById('df-x-blocker-card')) return; // already mounted
+    let card = document.getElementById('df-x-blocker-card');
+    if (card) {
+      syncUnblockButtonInCard(card);
+      return;
+    }
 
-    const card = document.createElement('div');
+    card = document.createElement('div');
     card.id = 'df-x-blocker-card';
 
     let headline = 'Getting to fucking work';
@@ -249,18 +305,6 @@
       headline = 'Notifications Locked';
       subtext = 'Notifications page is locked. Return to deep work.';
     }
-
-    const unblockHtml = showUnblockButton ? `
-      <div class="df-x-unblock-wrap">
-        <button class="df-x-btn-flip" id="df-x-btn-flip-action" type="button">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          </svg>
-          <span>Temporarily Unblock Feed</span>
-        </button>
-      </div>
-    ` : '';
 
     card.innerHTML = `
       <svg class="df-x-icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -274,23 +318,46 @@
         <span class="df-x-quote-mark end">"</span>
       </div>
       <p class="df-x-subtext">${subtext}</p>
-      ${unblockHtml}
       <div class="df-x-shortcut-hint">Emergency shortcut: Alt + Shift + X</div>
     `;
 
     primaryCol.prepend(card);
-
-    if (showUnblockButton) {
-      _btn = card.querySelector('#df-x-btn-flip-action');
-      if (_btn) {
-        _btn.addEventListener('click', () => toggleFeedFlip());
-      }
-    }
+    syncUnblockButtonInCard(card);
   }
 
   function removeBlockerCard() {
     document.querySelectorAll('#df-x-blocker-card').forEach(card => card.remove());
     _btn = null;
+  }
+
+  // =========================================================================
+  // Temporary Unblock Floating Banner
+  // =========================================================================
+
+  function showTemporaryUnblockBanner() {
+    if (document.getElementById('df-x-unblock-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'df-x-unblock-banner';
+    banner.innerHTML = `
+      <div class="df-x-unblock-banner-content">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.2"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>Feed unblocked</span>
+        <button type="button" class="df-x-btn-reblock" id="df-x-btn-reblock">Re-lock Feed</button>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    banner.querySelector('#df-x-btn-reblock')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFeedFlip();
+    });
+  }
+
+  function removeTemporaryUnblockBanner() {
+    document.getElementById('df-x-unblock-banner')?.remove();
   }
 
   // =========================================================================
@@ -315,16 +382,13 @@
     mutationDebounceId = requestAnimationFrame(() => {
       mutationDebounceId = null;
 
-      // Always update compose state in case modal opened without URL change or vice versa
-      updateComposeState();
-
       // Instantly catch SPA URL transitions during DOM render
       if (location.href !== lastUrl) {
         onUrlChange();
         return;
       }
 
-      if (!isFeedBlocked) return;
+      if (!xBlockerEnabled || !isFeedBlocked) return;
 
       // Notifications sidebar number capsule is kept hidden across all pages
       processNotifications();
@@ -334,7 +398,7 @@
         // Only block on Home, Explore, and Notifications
         processPostedCapsule();
         const primaryCol = document.querySelector('[data-testid="primaryColumn"]');
-        if (primaryCol && !document.getElementById('df-x-blocker-card')) {
+        if (primaryCol) {
           injectBlockerCard(pageType);
         }
       } else {
@@ -347,7 +411,7 @@
   }
 
   // Nodes that should NOT trigger a re-scan
-  const IGNORE_IDS = new Set(['df-x-blocker-card']);
+  const IGNORE_IDS = new Set(['df-x-blocker-card', 'df-x-unblock-banner']);
   const IGNORE_CLASSES = ['df-x-blocked-posted-pill', 'df-x-blocked-notification-badge'];
 
   function initObserver() {

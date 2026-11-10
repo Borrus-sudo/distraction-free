@@ -13,13 +13,14 @@ A lightweight, zero-dependency Chrome extension (Manifest V3) designed to elimin
 - **Specific Tweets & Profiles Always Work**:
   - Direct tweet links and conversation threads (`/username/status/...`) remain 100% usable.
   - User profile pages (`/username`), Direct Messages (`/messages`), Bookmarks (`/i/bookmarks`), and Lists are never blocked.
-- **Post Composer Background Blur**:
-  - When pressing "Post" or navigating to `/compose/post`, the underlying background feed remains strictly blocked and heavily blurred (`blur(16px)` + backdrop mask) so focus is never broken while writing.
+- **Post Composer on `/compose/post`**:
+  - When writing a post or navigating to `/compose/post`, feeds, trends, and timelines remain blocked like normal pages, while the post box remains 100% accessible and usable.
 - **Silenced Distraction Triggers**:
   - **Floating Blue "Posted" Capsule**: The floating pill prompting you to scroll back to top for new tweets is hidden.
   - **Notification Badge Silenced**: The blue unread number capsule on the Notifications bell link in the sidebar is hidden, and unread count badges in tab titles `(3)` are stripped.
-- **Manual Unblock & Emergency Override**:
-  - An optional manual unblock button can be toggled on inside the extension popup (disabled by default).
+- **Manual Unblock & Re-lock**:
+  - Master switch and optional manual unblock button can be toggled inside the extension popup (disabled by default).
+  - Floating badge enables one-click re-locking when temporarily unblocked.
   - Emergency shortcut: `Alt + Shift + X`.
 
 ---

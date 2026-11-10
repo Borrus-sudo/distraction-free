@@ -271,25 +271,78 @@ div[role="alert"][aria-live] {
 }
 
 /* ==========================================================================
-   POST COMPOSER MODAL BLUR & FEED SHIELD
-   When composing a post, blur the background feed completely and darken mask
+   6. TEMPORARY UNBLOCK FLOATING BANNER
    ========================================================================== */
-body.df-compose-open #react-root,
-body:has(#layers [data-testid="tweetTextarea_0"]) #react-root,
-body:has(#layers [role="dialog"]) #react-root,
-body:has(#layers [data-testid="mask"]) #react-root {
-  filter: blur(16px) !important;
-  -webkit-filter: blur(16px) !important;
-  transition: filter 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  pointer-events: none !important;
-  user-select: none !important;
+
+#df-x-unblock-banner {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  background: rgba(17, 24, 39, 0.94);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  user-select: none;
 }
 
-#layers [data-testid="mask"],
-#layers div[style*="background-color: rgba(0, 0, 0"],
-#layers div[style*="background-color:rgba(0, 0, 0"] {
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  background-color: rgba(0, 0, 0, 0.75) !important;
+.df-x-unblock-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f3f4f6;
+  font-size: 13px;
+  font-weight: 600;
 }
+
+.df-x-btn-reblock {
+  background: #ef4444;
+  border: none;
+  border-radius: 9999px;
+  color: #ffffff;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.df-x-btn-reblock:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.df-x-btn-reblock:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   7. POST COMPOSER ON /compose/post — ALWAYS ACCESSIBLE (ZERO BLUR)
+   Everything on /compose/post remains blocked like normal pages, but the
+   composer modal dialog, textarea, and action buttons remain 100% accessible.
+   ========================================================================== */
+#layers [role="dialog"],
+#layers [aria-modal="true"],
+#layers [data-testid="tweetTextarea_0"],
+#layers [data-testid="tweetTextarea_0_label"],
+#layers [data-testid="tweetButton"],
+#layers [data-testid="toolBar"],
+#layers [data-testid="app-bar-close"],
+#layers [aria-label="Close"],
+[data-testid="tweetTextarea_0"],
+[data-testid="tweetTextarea_0_label"],
+[data-testid="tweetButton"],
+[data-testid="tweetButtonInline"],
+[data-testid="toolBar"] {
+  display: revert !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
 

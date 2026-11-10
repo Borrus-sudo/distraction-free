@@ -2,15 +2,12 @@ const assert = require('assert');
 
 console.log('--- Running Routing, Title Stripping & Badge Classification Tests ---');
 
-// Test 1: Page Type Classifier with Compose State Handling
-let lastNonComposePath = '/home';
+// Test 1: Page Type Classifier with Compose Handling
 function getBlockedPageType(pathname) {
-  let path = pathname.toLowerCase();
-  if (path.startsWith('/compose/')) {
-    path = lastNonComposePath;
-  } else {
-    lastNonComposePath = path;
-  }
+  const path = pathname.toLowerCase();
+  // 0. Compose on X: everything remains blocked like the normal pages,
+  // but the post box remains accessible
+  if (path.startsWith('/compose/')) return 'home';
   // 1. Home
   if (path === '/' || path === '/home') return 'home';
   // 2. Explore / Search / Trends
@@ -29,15 +26,12 @@ assert.strictEqual(getBlockedPageType('/i/trends'), 'explore');
 assert.strictEqual(getBlockedPageType('/search'), 'explore');
 assert.strictEqual(getBlockedPageType('/notifications'), 'notifications');
 assert.strictEqual(getBlockedPageType('/notifications/verified'), 'notifications');
-// Preserving blocked state when opening composer from blocked page
-assert.strictEqual(getBlockedPageType('/home'), 'home');
 assert.strictEqual(getBlockedPageType('/compose/post'), 'home');
 assert.strictEqual(getBlockedPageType('/compose/tweet'), 'home');
-console.log('✅ Test 1 Passed: Home, Explore, Notifications, and /compose/ on Home correctly identified as blocked');
+console.log('✅ Test 1 Passed: Home, Explore, Notifications, and /compose/ correctly identified as blocked');
 
 // Unblocked pages ("rest everything should be useable")
 assert.strictEqual(getBlockedPageType('/elonmusk'), null);
-assert.strictEqual(getBlockedPageType('/compose/post'), null); // compose from profile preserves unblocked state
 assert.strictEqual(getBlockedPageType('/username/status/1888999'), null);
 assert.strictEqual(getBlockedPageType('/messages'), null);
 assert.strictEqual(getBlockedPageType('/i/bookmarks'), null);

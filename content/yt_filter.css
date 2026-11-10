@@ -85,13 +85,8 @@
   font-style: italic !important;
 }
 
-/* Unblock button — hidden by default; shown when toggle is On */
+/* Unblock button — controlled dynamically by toggle in popup */
 .df-btn-unblock {
-  display: none !important;
-}
-
-body.df-yt-unblock-visible .df-btn-unblock,
-.df-yt-unblock-visible .df-btn-unblock {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -108,16 +103,14 @@ body.df-yt-unblock-visible .df-btn-unblock,
   transition: all 0.15s ease !important;
 }
 
-body.df-yt-unblock-visible .df-btn-unblock:hover,
-.df-yt-unblock-visible .df-btn-unblock:hover {
+.df-btn-unblock:hover {
   background: #4f46e5 !important;
   border-color: #6366f1 !important;
   color: #ffffff !important;
   transform: translateY(-1px) !important;
 }
 
-body.df-yt-unblock-visible .df-btn-unblock:active,
-.df-yt-unblock-visible .df-btn-unblock:active {
+.df-btn-unblock:active {
   transform: translateY(0) !important;
 }
 
